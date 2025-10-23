@@ -10,6 +10,15 @@
   <h1>Muistipeli</h1>
   <h2>Pisteet: <span id="score">0</span></h2>
   <h2>Aika: <span id="timer">0</span> sekuntia</h2>
+  <h3>Paras tulos: <span id="best-score">0</span> pistettä</h3>
+<h3>Paras aika: <span id="best-time">∞</span> sekuntia</h3>
+  <label for="difficulty">Vaikeustaso:</label>
+<select id="difficulty">
+  <option value="easy">Helppo (4 paria)</option>
+  <option value="medium" selected>Keskitaso (8 paria)</option>
+  <option value="hard">Vaikea (12 paria)</option>
+</select>
+<button id="start-btn">Aloita peli</button>
   <div class="game-board" id="game-board"></div>
   <script src="script.js"></script>
 </body>
