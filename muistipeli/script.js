@@ -1,8 +1,25 @@
 const board = document.getElementById('game-board');
+const scoreDisplay = document.getElementById('score');
 const emojis = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍍', '🥝', '🍉'];
-let cards = [...emojis, ...emojis]; // 2x jokainen emoji
+const timerDisplay = document.getElementById('timer');
+let seconds = 0;
+let timerInterval = null;
+let cards = [...emojis, ...emojis];
 let flippedCards = [];
 let lockBoard = false;
+let score = 0;
+
+
+// Käynnistä ajastin
+function startTimer() {
+  timerInterval = setInterval(() => {
+    seconds++;
+    timerDisplay.textContent = seconds;
+  }, 1000);
+}
+
+// Käynnistä ajastin heti pelin alussa
+startTimer();
 
 // Sekoita kortit
 cards.sort(() => 0.5 - Math.random());
@@ -35,6 +52,8 @@ function flipCard() {
 function checkMatch() {
   const [card1, card2] = flippedCards;
   if (card1.dataset.emoji === card2.dataset.emoji) {
+    score += 10;
+    updateScore();
     flippedCards = [];
     lockBoard = false;
   } else {
@@ -47,4 +66,8 @@ function checkMatch() {
       lockBoard = false;
     }, 1000);
   }
+}
+
+function updateScore() {
+  scoreDisplay.textContent = score;
 }
