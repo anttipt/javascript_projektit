@@ -1,24 +1,32 @@
-const board = document.getElementById('game-board');
-const scoreDisplay = document.getElementById('score');
-const timerDisplay = document.getElementById('timer');
-const difficultySelect = document.getElementById('difficulty');
-const startBtn = document.getElementById('start-btn');
-const bestScoreDisplay = document.getElementById('best-score');
-const bestTimeDisplay = document.getElementById('best-time');
-const allEmojis = ['🍎','🍌','🍇','🍓','🍒','🍍','🥝','🍉','🍋','🍑','🥥','🍈'];
-let flippedCards = [];
-let lockBoard = false;
-let score = 0;
-let seconds = 0;
-let timerInterval = null;
-let matchedPairs = 0;
-let totalPairs = 0;
+// Haetaan HTML-elementit DOMista
+const board = document.getElementById('game-board');           // Pelilauta, johon kortit lisätään
+const scoreDisplay = document.getElementById('score');         // Pisteiden näyttö
+const timerDisplay = document.getElementById('timer');         // Ajastimen näyttö
+const difficultySelect = document.getElementById('difficulty');// Vaikeustason valinta
+const startBtn = document.getElementById('start-btn');         // Aloituspainike
+const bestScoreDisplay = document.getElementById('best-score');// Paras pistemäärä
+const bestTimeDisplay = document.getElementById('best-time');  // Paras aika
 
+// Kaikki mahdolliset emoji-parit
+const allEmojis = ['🍎','🍌','🍇','🍓','🍒','🍍','🥝','🍉','🍋','🍑','🥥','🍈'];
+
+// Pelin tilamuuttujat
+let flippedCards = [];       // Kortit, jotka on käännetty
+let lockBoard = false;       // Estää korttien klikkauksen kun kaksi on auki
+let score = 0;               // Nykyinen pistemäärä
+let seconds = 0;             // Kulunut aika sekunteina
+let timerInterval = null;    // Ajastimen intervalli
+let matchedPairs = 0;        // Löydetyt parit
+let totalPairs = 0;          // Pelissä olevien parien määrä
+
+// Aloituspainikkeen kuuntelija
 startBtn.addEventListener('click', startGame);
-// Kutsu pelin alussa
+
+// Ladataan ennätykset pelin alussa
 loadBestResults();
 
-// Lataa ennätykset
+
+// 🔄 Lataa tallennetut ennätykset localStoragesta
 function loadBestResults() {
   const bestScore = localStorage.getItem('bestScore') || 0;
   const bestTime = localStorage.getItem('bestTime') || '∞';
@@ -26,7 +34,8 @@ function loadBestResults() {
   bestTimeDisplay.textContent = bestTime;
 }
 
-// Tallenna ennätys jos parempi
+
+// 💾 Tallenna uudet ennätykset, jos nykyinen tulos on parempi
 function saveBestResults() {
   const prevScore = parseInt(localStorage.getItem('bestScore')) || 0;
   const prevTime = parseInt(localStorage.getItem('bestTime')) || Infinity;
@@ -37,16 +46,23 @@ function saveBestResults() {
   if (seconds < prevTime) {
     localStorage.setItem('bestTime', seconds);
   }
-  loadBestResults();
+  loadBestResults(); // Päivitä näkymä
 }
 
+
+// 🎮 Käynnistää uuden pelin valitulla vaikeustasolla
 function startGame() {
-  resetGame();
+  resetGame(); // Tyhjennä edellinen peli
+
+  // Määritä parien määrä vaikeustason mukaan
   const difficulty = difficultySelect.value;
   totalPairs = difficulty === 'easy' ? 4 : difficulty === 'medium' ? 8 : 12;
+
+  // Valitse tarvittava määrä emojeja ja sekoita kortit
   const selectedEmojis = allEmojis.slice(0, totalPairs);
   const cards = [...selectedEmojis, ...selectedEmojis].sort(() => 0.5 - Math.random());
 
+  // Luo kortit ja lisää ne pelilaudalle
   cards.forEach((emoji, index) => {
     const card = document.createElement('div');
     card.classList.add('card');
@@ -57,11 +73,13 @@ function startGame() {
     board.appendChild(card);
   });
 
-  startTimer();
+  startTimer(); // Käynnistä ajastin
 }
 
+
+// 🔄 Nollaa pelin tila ja näkymä
 function resetGame() {
-  board.innerHTML = '';
+  board.innerHTML = '';             // Tyhjennä pelilauta
   score = 0;
   seconds = 0;
   matchedPairs = 0;
@@ -69,9 +87,11 @@ function resetGame() {
   lockBoard = false;
   scoreDisplay.textContent = score;
   timerDisplay.textContent = seconds;
-  clearInterval(timerInterval);
+  clearInterval(timerInterval);     // Pysäytä vanha ajastin
 }
 
+
+// ⏱️ Käynnistää ajastimen
 function startTimer() {
   timerInterval = setInterval(() => {
     seconds++;
@@ -79,6 +99,8 @@ function startTimer() {
   }, 1000);
 }
 
+
+// 🎴 Käsittelee kortin klikkauksen
 function flipCard() {
   if (lockBoard || this.classList.contains('flipped')) return;
 
@@ -86,14 +108,18 @@ function flipCard() {
   this.textContent = this.dataset.emoji;
   flippedCards.push(this);
 
+  // Jos kaksi korttia on auki, tarkista pari
   if (flippedCards.length === 2) {
     lockBoard = true;
     checkMatch();
   }
 }
 
+
+// ✅ Tarkistaa, muodostavatko kaksi korttia parin
 function checkMatch() {
   const [card1, card2] = flippedCards;
+
   if (card1.dataset.emoji === card2.dataset.emoji) {
     score += 10;
     matchedPairs++;
@@ -101,12 +127,15 @@ function checkMatch() {
     flippedCards = [];
     lockBoard = false;
 
-if (matchedPairs === totalPairs) {
-  clearInterval(timerInterval);
-  saveBestResults();
-  alert(`Voitit pelin! Aika: ${seconds} sekuntia`);
-}
+    // Jos kaikki parit on löydetty, peli päättyy
+    if (matchedPairs === totalPairs) {
+      clearInterval(timerInterval);
+      saveBestResults();
+      alert(`Voitit pelin! Aika: ${seconds} sekuntia`);
+    }
+
   } else {
+    // Jos ei ole pari, käännä takaisin pienen viiveen jälkeen
     setTimeout(() => {
       card1.classList.remove('flipped');
       card2.classList.remove('flipped');
@@ -119,7 +148,7 @@ if (matchedPairs === totalPairs) {
 }
 
 
-
+// 🔢 Päivittää pisteiden näkymän
 function updateScore() {
   scoreDisplay.textContent = score;
 }
